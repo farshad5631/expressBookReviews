@@ -29,7 +29,7 @@ public_users.post("/register", (req, res) => {
     return res.status(201).json({ message: "User registered successfully" });
   });
   
-  module.exports = public_users;
+module.exports = public_users;
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
