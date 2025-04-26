@@ -2,6 +2,7 @@ const express = require('express');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
+const axios = require("axios");
 const public_users = express.Router();
 
 
@@ -37,6 +38,32 @@ public_users.get('/',function (req, res) {
   return res.status(300).json({message: "List of all books"});
 });
 
+// Get the book list available in the shop using async-await
+public_users.get("/", async (req, res) => {
+    try {
+        const response = await axios.get("https://farshadkalh1-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/booksdb");
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving books", error: error.message });
+    }
+});
+
+// Get book details based on ISBN using async-await
+public_users.get("/isbn/:isbn", async (req, res) => {
+    const { isbn } = req.params;
+
+    try {
+        // Fetch book details from the database (replace URL if needed)
+        const response = await axios.get(`https://farshadkalh1-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/booksdb/${isbn}`);
+
+        // Send the book details
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(404).json({ message: "Book not found", error: error.message });
+    }
+});
+
+
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   const isbn = req.params.isbn;
@@ -56,6 +83,27 @@ public_users.get('/author/:author', function (req, res) {
     }
   });
 
+// Get book details based on Author using async-await
+public_users.get("/author/:author", async (req, res) => {
+    const { author } = req.params;
+
+    try {
+        // Fetch book details from the database (modify URL as needed)
+        const response = await axios.get("https://farshadkalh1-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai");
+
+        // Filter books based on the author's name
+        const booksByAuthor = Object.values(response.data).filter(book => book.author === author);
+
+        if (booksByAuthor.length > 0) {
+            res.status(200).json({ books: booksByAuthor });
+        } else {
+            res.status(404).json({ message: "No books found for the specified author." });
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving books", error: error.message });
+    }
+});
+
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
     const title = req.params.title;
@@ -65,6 +113,27 @@ public_users.get('/title/:title',function (req, res) {
       res.status(200).json({ books: booksByTitle });
     } else {
       res.status(404).json({ message: "No books found for the specified title." });
+    }
+});
+
+// Get book details based on Title using async-await
+public_users.get("/title/:title", async (req, res) => {
+    const { title } = req.params;
+
+    try {
+        // Fetch book details from the database (modify URL if needed)
+        const response = await axios.get("https://farshadkalh1-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai");
+
+        // Filter books based on the title
+        const booksByTitle = Object.values(response.data).filter(book => book.title === title);
+
+        if (booksByTitle.length > 0) {
+            res.status(200).json({ books: booksByTitle });
+        } else {
+            res.status(404).json({ message: "No books found for the specified title." });
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving books", error: error.message });
     }
 });
 
